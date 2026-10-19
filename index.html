@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KNIFE HAND // Speed Typer Survival</title>
+    <script>document.documentElement.dataset.theme = localStorage.getItem('knifehand_theme') === 'light' ? 'light' : 'dark';</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container" id="gameContainer">
+        <!-- Top Navigation / Stats Bar -->
+        <!-- Top Navigation / Stats Bar with Integrated Lives Meter -->
+        <header class="hud-header">
+            <div class="brand">
+                <div class="brand-text">
+                    <span class="title">KNIFE<span class="highlight">HAND</span></span>
+                    <span class="subtitle">SPEED SURVIVAL</span>
+                </div>
+                <a href="https://buymeacoffee.com/antareskrrt" target="_blank" rel="noopener noreferrer" class="bmc-floating-widget" title="Buy me a coffee">
+                    <svg class="bmc-cup-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                        <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                        <line x1="6" y1="1" x2="6" y2="4"></line>
+                        <line x1="10" y1="1" x2="10" y2="4"></line>
+                        <line x1="14" y1="1" x2="14" y2="4"></line>
+                    </svg>
+                    <span class="bmc-text">Buy me a coffee</span>
+                </a>
+            </div>
+
+            <!-- Integrated Minimalist Lives Meter -->
+            <div class="hud-lives" id="hudLivesContainer">
+                <span class="hud-lives-label" id="hudLivesLabel">LIVES</span>
+                <div class="life-pips" id="lifePips">
+                    <span class="life-pip active" data-index="0" title="Pinky"></span>
+                    <span class="life-pip active" data-index="1" title="Ring"></span>
+                    <span class="life-pip active" data-index="2" title="Middle"></span>
+                    <span class="life-pip active" data-index="3" title="Index"></span>
+                    <span class="life-pip active" data-index="4" title="Thumb"></span>
+                </div>
+                <span id="livesCountText" class="lives-number">5/5</span>
+            </div>
+
+            <!-- Real-time HUD Metrics -->
+            <div class="stats-panel">
+                <div class="stat-box" id="hudStatBox1">
+                    <span class="stat-label" id="hudStatLabel1">LEVEL</span>
+                    <span class="stat-value" id="hudLevel">1</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">WPM</span>
+                    <span class="stat-value" id="hudWpm">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">ACCURACY</span>
+                    <span class="stat-value" id="hudAccuracy">100%</span>
+                </div>
+                <div class="stat-box" id="hudStatBox4">
+                    <span class="stat-label" id="hudStatLabel4">CLEARED</span>
+                    <span class="stat-value" id="hudCompleted">0</span>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <button id="muteBtn" class="hud-btn" title="Toggle Sound">
+                    <svg class="hud-svg icon-sound-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path class="sound-wave" d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                    <svg class="hud-svg icon-sound-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <line x1="23" y1="9" x2="17" y2="15"></line>
+                        <line x1="17" y1="9" x2="23" y2="15"></line>
+                    </svg>
+                </button>
+                <button id="restartBtn" class="hud-btn" title="Restart Game">
+                    <svg class="hud-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="1 4 1 10 7 10"></polyline>
+                        <polyline points="23 20 23 14 17 14"></polyline>
+                        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Center Stage: The Table with SVG Hand, Animated Knife, and Particle Canvas -->
+        <main class="table-stage" id="tableStage">
+            <canvas id="particleCanvas"></canvas>
+
+            <!-- Floating combat text layer (e.g., "-1 LIFE!", "COMBO!", "+100 PTS") -->
+            <div id="floatingTextLayer" class="floating-text-layer"></div>
+
+            <!-- Mode-specific icon and title shown when the hand scene is hidden -->
+            <div class="zen-watermark" id="zenWatermark">
+                <div class="zen-icon-ring">
+                    <svg class="zen-svg zen-svg-infinite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18.178 8c5.096 0 5.096 8 0 8-2.68 0-4.408-2.148-6.178-4-1.77-1.852-3.498-4-6.178-4-5.096 0-5.096 8 0 8 2.68 0 4.408-2.148 6.178-4 1.77-1.852 3.498-4 6.178-4z"></path>
+                    </svg>
+                    <svg class="zen-svg zen-svg-sprint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M7 3.75h7.5L19 8.25v12H7z"></path>
+                        <path d="M14 3.75v4.5h5M10 12h6M10 15.5h6"></path>
+                    </svg>
+                    <svg class="zen-svg zen-svg-timer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="13" r="8"></circle>
+                        <path d="M12 9v4l2.5 1.5M9 2.75h6M12 2.75v2.1M18.1 6.9l1.4-1.4"></path>
+                    </svg>
+                </div>
+                <span class="zen-title">INFINITE PRACTICE</span>
+                <span class="zen-subtitle">UNLIMITED TYPING &bull; NO LIVES &bull; NO KNIFE</span>
+            </div>
+
+            <!-- The Hand & Knife Sandbox -->
+            <div class="hand-scene" id="handScene">
+                <img class="hand-image" id="handImage" src="hands&amp;knife_asset/hand.png" alt="" aria-hidden="true">
+                <!-- SVG Hand -->
+                <svg id="handSvg" viewBox="0 0 500 480" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <!-- Wood / Table Drop Shadow Filter -->
+                        <filter id="handShadow" x="-25%" y="-25%" width="150%" height="155%">
+                            <feDropShadow dx="2" dy="16" stdDeviation="9" flood-color="#090a0d" flood-opacity="0.88" />
+                        </filter>
+                        <filter id="bladeShadow" x="-50%" y="-30%" width="200%" height="170%">
+                            <feDropShadow dx="7" dy="12" stdDeviation="4" flood-color="#050608" flood-opacity="0.85" />
+                        </filter>
+                        <linearGradient id="skinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#f4c49a" />
+                            <stop offset="38%" stop-color="#c98762" />
+                            <stop offset="72%" stop-color="#a96248" />
+                            <stop offset="100%" stop-color="#714036" />
+                        </linearGradient>
+                        <linearGradient id="palmCreaseGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#713f36" stop-opacity="0.72" />
+                            <stop offset="100%" stop-color="#8c5141" stop-opacity="0.2" />
+                        </linearGradient>
+                        <linearGradient id="nailGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#f0c9b5" />
+                            <stop offset="100%" stop-color="#b47769" />
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Base Hand Contour Group with Shadow -->
+                    <g filter="url(#handShadow)">
+                        <!-- Wrist & Arm Base -->
+                        <path class="skin-base" d="M190 480 L190 411 L177 356 L163 315 L159 274 L171 236 L190 207 L216 190 L253 185 L289 193 L316 213 L334 247 L341 291 L340 337 L330 386 L330 480 Z" fill="url(#skinGrad)" stroke="#613b34" stroke-width="3" stroke-linejoin="round"/>
+
+                        <!-- Thumb -->
+                        <g id="fingerGroup-thumb" class="finger-group" data-finger="thumb">
+                            <path id="fingerPath-thumb" class="finger-skin" d="M166 300 L137 290 L109 273 L85 249 L68 224 L62 202 L70 185 L84 179 L101 188 L123 209 L149 231 L173 250 Z" fill="url(#skinGrad)" stroke="#704338" stroke-width="2.5" stroke-linejoin="round"/>
+                            <path d="M70 204 L82 187 L98 197 L119 221 L105 231 L84 221 Z M110 239 L124 223 L149 245 L165 263 L159 283 L139 276 Z" fill="#f0bd91" opacity="0.42"/>
+                            <path d="M78 240 L97 250 L112 267 L103 274 L84 254 Z" fill="#713f38" opacity="0.35"/>
+                            <!-- Fingernail -->
+                            <path d="M69 195 L74 183 L84 181 L91 190 L89 202 L80 208 L71 203 Z" fill="url(#nailGrad)" stroke="#784a40" stroke-width="1.5" stroke-linejoin="round"/>
+                            <!-- Wound Marker (Hidden by default) -->
+                            <g class="wound-graphic" id="wound-thumb" opacity="0">
+                                <circle cx="82" cy="202" r="16" fill="#880000" />
+                                <circle cx="82" cy="202" r="11" fill="#c00000" />
+                                <path d="M72 195 L92 210 M73 210 L91 195" stroke="#ff2222" stroke-width="3" stroke-linecap="round"/>
+                                <rect x="70" y="198" width="24" height="7" rx="3" fill="#e8c080" stroke="#8a5a22" stroke-width="1.5" transform="rotate(20 82 202)"/>
+                            </g>
+                        </g>
+
+                        <!-- Index Finger -->
+                        <g id="fingerGroup-index" class="finger-group" data-finger="index">
+                            <path id="fingerPath-index" class="finger-skin" d="M184 221 L181 169 L180 116 L181 76 L186 55 L198 48 L209 54 L215 75 L217 119 L221 174 L224 210 Z" fill="url(#skinGrad)" stroke="#704338" stroke-width="2.5" stroke-linejoin="round"/>
+                            <path d="M184 73 L190 56 L198 53 L197 104 L188 112 Z M190 125 L203 119 L213 127 L216 171 L198 178 Z" fill="#f2c59a" opacity="0.42"/>
+                            <path d="M183 157 L195 164 L214 158 L216 168 L195 177 L185 172 Z" fill="#704039" opacity="0.38"/>
+                            <!-- Fingernail -->
+                            <path d="M187 63 L190 53 L198 49 L206 54 L209 64 L204 72 L193 72 Z" fill="url(#nailGrad)" stroke="#784a40" stroke-width="1.5" stroke-linejoin="round"/>
+                            <!-- Wound Marker -->
+                            <g class="wound-graphic" id="wound-index" opacity="0">
+                                <circle cx="198" cy="72" r="16" fill="#880000" />
+                                <circle cx="198" cy="72" r="11" fill="#c00000" />
+                                <path d="M188 65 L208 80 M188 80 L208 65" stroke="#ff2222" stroke-width="3" stroke-linecap="round"/>
+                                <rect x="186" y="69" width="24" height="7" rx="3" fill="#e8c080" stroke="#8a5a22" stroke-width="1.5" transform="rotate(-15 198 72)"/>
+                            </g>
+                        </g>
+
+                        <!-- Middle Finger -->
+                        <g id="fingerGroup-middle" class="finger-group" data-finger="middle">
+                            <path id="fingerPath-middle" class="finger-skin" d="M228 204 L229 151 L230 96 L234 43 L240 23 L252 17 L264 21 L270 40 L271 91 L270 147 L268 205 Z" fill="url(#skinGrad)" stroke="#704338" stroke-width="2.5" stroke-linejoin="round"/>
+                            <path d="M236 43 L242 25 L251 21 L252 82 L238 88 Z M239 108 L254 101 L269 108 L269 151 L251 159 L238 151 Z" fill="#f2c59a" opacity="0.42"/>
+                            <path d="M231 145 L245 152 L268 143 L268 155 L249 165 L231 158 Z" fill="#704039" opacity="0.38"/>
+                            <!-- Fingernail -->
+                            <path d="M241 31 L245 20 L253 17 L262 21 L266 32 L261 40 L247 40 Z" fill="url(#nailGrad)" stroke="#784a40" stroke-width="1.5" stroke-linejoin="round"/>
+                            <!-- Wound Marker -->
+                            <g class="wound-graphic" id="wound-middle" opacity="0">
+                                <circle cx="253" cy="40" r="16" fill="#880000" />
+                                <circle cx="253" cy="40" r="11" fill="#c00000" />
+                                <path d="M243 33 L263 48 M243 48 L263 33" stroke="#ff2222" stroke-width="3" stroke-linecap="round"/>
+                                <rect x="241" y="37" width="24" height="7" rx="3" fill="#e8c080" stroke="#8a5a22" stroke-width="1.5"/>
+                            </g>
+                        </g>
+
+                        <!-- Ring Finger -->
+                        <g id="fingerGroup-ring" class="finger-group" data-finger="ring">
+                            <path id="fingerPath-ring" class="finger-skin" d="M271 210 L276 163 L284 116 L291 77 L298 55 L310 49 L321 55 L324 72 L318 119 L312 170 L308 218 Z" fill="url(#skinGrad)" stroke="#704338" stroke-width="2.5" stroke-linejoin="round"/>
+                            <path d="M296 74 L303 56 L311 53 L307 104 L292 111 Z M291 128 L305 122 L317 130 L312 171 L298 178 L285 167 Z" fill="#f2c59a" opacity="0.4"/>
+                            <path d="M278 162 L291 168 L313 160 L311 171 L294 181 L277 174 Z" fill="#704039" opacity="0.38"/>
+                            <!-- Fingernail -->
+                            <path d="M297 65 L302 54 L311 51 L319 57 L319 68 L312 75 L301 73 Z" fill="url(#nailGrad)" stroke="#784a40" stroke-width="1.5" stroke-linejoin="round"/>
+                            <!-- Wound Marker -->
+                            <g class="wound-graphic" id="wound-ring" opacity="0">
+                                <circle cx="308" cy="75" r="16" fill="#880000" />
+                                <circle cx="308" cy="75" r="11" fill="#c00000" />
+                                <path d="M298 68 L318 83 M298 83 L318 68" stroke="#ff2222" stroke-width="3" stroke-linecap="round"/>
+                                <rect x="296" y="72" width="24" height="7" rx="3" fill="#e8c080" stroke="#8a5a22" stroke-width="1.5" transform="rotate(15 308 75)"/>
+                            </g>
+                        </g>
+
+                        <!-- Pinky Finger -->
+                        <g id="fingerGroup-pinky" class="finger-group" data-finger="pinky">
+                            <path id="fingerPath-pinky" class="finger-skin" d="M310 229 L326 196 L342 164 L356 133 L367 116 L380 113 L390 122 L386 139 L369 177 L353 218 L343 252 Z" fill="url(#skinGrad)" stroke="#704338" stroke-width="2.5" stroke-linejoin="round"/>
+                            <path d="M362 132 L371 117 L380 117 L362 168 L349 171 Z M342 187 L356 181 L371 190 L355 226 L342 232 L332 218 Z" fill="#f2c59a" opacity="0.4"/>
+                            <path d="M326 211 L340 216 L358 205 L354 219 L343 231 L330 225 Z" fill="#704039" opacity="0.38"/>
+                            <!-- Fingernail -->
+                            <path d="M364 126 L370 116 L378 115 L384 122 L381 132 L373 137 L366 133 Z" fill="url(#nailGrad)" stroke="#784a40" stroke-width="1.5" stroke-linejoin="round"/>
+                            <!-- Wound Marker -->
+                            <g class="wound-graphic" id="wound-pinky" opacity="0">
+                                <circle cx="372" cy="132" r="16" fill="#880000" />
+                                <circle cx="372" cy="132" r="11" fill="#c00000" />
+                                <path d="M362 125 L382 140 M362 140 L382 125" stroke="#ff2222" stroke-width="3" stroke-linecap="round"/>
+                                <rect x="360" y="129" width="24" height="7" rx="3" fill="#e8c080" stroke="#8a5a22" stroke-width="1.5" transform="rotate(30 372 132)"/>
+                            </g>
+                        </g>
+
+                        <!-- Palm Body -->
+                        <path d="M165 270 L176 233 L197 207 L222 195 L255 191 L291 198 L320 218 L337 249 L344 286 L339 330 L326 366 L304 392 L271 405 L229 402 L196 389 L178 362 L167 328 Z" fill="url(#skinGrad)" stroke="#613b34" stroke-width="3" stroke-linejoin="round"/>
+
+                        <!-- Low-poly light planes across the back of the hand -->
+                        <path d="M179 251 L200 216 L225 202 L230 249 L207 279 Z" fill="#f4c79a" opacity="0.48"/>
+                        <path d="M230 202 L255 197 L278 205 L267 247 L230 249 Z" fill="#e8b38a" opacity="0.4"/>
+                        <path d="M278 205 L312 223 L330 253 L304 269 L267 247 Z" fill="#f1c094" opacity="0.42"/>
+                        <path d="M181 286 L207 279 L230 249 L267 247 L259 292 L222 319 L185 315 Z" fill="#bd795b" opacity="0.3"/>
+                        <path d="M267 247 L304 269 L330 253 L335 302 L309 329 L274 315 L259 292 Z" fill="#d5946d" opacity="0.4"/>
+                        <path d="M185 315 L222 319 L259 292 L274 315 L259 359 L227 382 L197 365 Z" fill="#f0bd91" opacity="0.36"/>
+                        <path d="M274 315 L309 329 L335 302 L326 353 L304 380 L270 386 L259 359 Z" fill="#8e5545" opacity="0.34"/>
+                        <path d="M191 376 L227 382 L259 359 L270 386 L244 398 L209 389 Z" fill="#f2c49a" opacity="0.38"/>
+                        <path d="M194 411 L226 402 L246 411 L241 480 L190 480 Z" fill="#edbd94" opacity="0.34"/>
+                        <path d="M246 411 L275 402 L309 392 L330 386 L330 480 L244 480 Z" fill="#75473d" opacity="0.3"/>
+                        <path d="M193 413 L245 411 L274 403 L310 393" stroke="#613b34" stroke-opacity="0.62" stroke-width="2" fill="none"/>
+
+                        <!-- Palm Creases / Lines (Lifeline, Heartline, Head line) -->
+                        <path d="M185 265 Q230 270 285 305" stroke="url(#palmCreaseGrad)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+                        <path d="M195 240 Q250 245 320 255" stroke="url(#palmCreaseGrad)" stroke-width="3" stroke-linecap="round" fill="none"/>
+                        <path d="M210 290 Q240 330 260 370" stroke="url(#palmCreaseGrad)" stroke-width="3" stroke-linecap="round" fill="none"/>
+                    </g>
+                </svg>
+
+                <!-- The Realistic Animated Knife Element -->
+                <div class="knife-rig" id="knifeRig">
+                    <div class="knife-inner" id="knifeInner">
+                        <img class="knife-image" src="hands&amp;knife_asset/knife.png" alt="" aria-hidden="true">
+                        <svg class="knife-svg" viewBox="0 0 100 450" xmlns="http://www.w3.org/2000/svg" filter="url(#bladeShadow)">
+                            <defs>
+                                <linearGradient id="bladeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#34414b"/>
+                                    <stop offset="18%" stop-color="#82939a"/>
+                                    <stop offset="42%" stop-color="#e3e8e4"/>
+                                    <stop offset="49%" stop-color="#f8f5e9"/>
+                                    <stop offset="52%" stop-color="#73818b"/>
+                                    <stop offset="100%" stop-color="#27333e"/>
+                                </linearGradient>
+                                <linearGradient id="edgeGleam" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#f8f4de" stop-opacity="0.8"/>
+                                    <stop offset="70%" stop-color="#c3d1d2" stop-opacity="0.28"/>
+                                    <stop offset="100%" stop-color="#ffffff" stop-opacity="0.92"/>
+                                </linearGradient>
+                                <linearGradient id="handleWood" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#170e0d"/>
+                                    <stop offset="24%" stop-color="#603820"/>
+                                    <stop offset="52%" stop-color="#9a6240"/>
+                                    <stop offset="76%" stop-color="#4a281b"/>
+                                    <stop offset="100%" stop-color="#180f0e"/>
+                                </linearGradient>
+                                <linearGradient id="brassGuard" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#ffe39a"/>
+                                    <stop offset="42%" stop-color="#b98535"/>
+                                    <stop offset="100%" stop-color="#513316"/>
+                                </linearGradient>
+                            </defs>
+
+                            <path d="M39 10 L46 6 L57 7 L63 12 L66 119 L60 126 L39 124 L34 119 Z" fill="url(#handleWood)" stroke="#140d0c" stroke-width="2" stroke-linejoin="round"/>
+                            <path d="M42 13 L49 10 L52 119 L42 119 Z" fill="#d49a61" opacity="0.32"/>
+                            <path d="M55 11 L61 14 L63 115 L57 120 Z" fill="#100b0b" opacity="0.38"/>
+                            <path d="M40 30 L61 27 M40 64 L62 61 M41 98 L63 95" stroke="#c08a55" stroke-opacity="0.38" stroke-width="1"/>
+                            <path d="M45 35 L49 31 L54 34 L53 40 L48 42 Z M45 70 L49 66 L54 69 L53 75 L48 77 Z M45 105 L49 101 L54 104 L53 110 L48 112 Z" fill="url(#brassGuard)" stroke="#382719" stroke-width="1"/>
+
+                            <path d="M23 121 L29 116 L71 116 L77 121 L74 133 L68 139 L32 138 L26 134 Z" fill="url(#brassGuard)" stroke="#40301c" stroke-width="2" stroke-linejoin="round"/>
+                            <path d="M29 120 L48 120 L47 135 L32 134 Z" fill="#fff0bb" opacity="0.42"/>
+                            <path d="M51 120 L70 120 L68 134 L52 135 Z" fill="#6d491f" opacity="0.52"/>
+
+                            <path d="M30 137 L70 137 L68 338 L61 393 L50 435 L39 393 L32 338 Z" fill="url(#bladeGrad)" stroke="#27333d" stroke-width="2" stroke-linejoin="round"/>
+                            <path d="M32 141 L47 141 L47 395 L40 389 L34 338 Z" fill="#f0f1e9" opacity="0.46"/>
+                            <path d="M51 141 L68 141 L66 338 L60 385 L52 411 Z" fill="#16212a" opacity="0.42"/>
+                            <path d="M47 141 L51 141 L51 421 L49 432 L47 419 Z" fill="#ffffff" opacity="0.78"/>
+                            <path d="M32 142 L34 338 L40 389 L50 435" stroke="url(#edgeGleam)" stroke-width="2" fill="none"/>
+                            <path id="bladeBloodTip" d="M42 390 Q50 435 50 435 Q50 435 58 390 Q53 400 48 395 Z" fill="#b30000" opacity="0"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Typing Console (Monkeytype / Typeracer polished interface) -->
+        <section class="typing-section" id="typingSection">
+            <!-- Difficulty Level Title & Phrase Progress Tracker -->
+            <div class="phrase-meta">
+                <div class="phrase-meta-start">
+                    <button id="modeMenuBtn" class="hud-btn hud-btn-mode" title="Change Mode (Menu)">
+                        <svg class="hud-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        <span class="hud-btn-text">Mode</span>
+                    </button>
+                    <button class="theme-toggle-btn" id="themeToggleBtn" type="button" aria-label="Switch to light mode" aria-pressed="false" title="Switch to light mode">
+                        <svg class="theme-icon theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="4"></circle>
+                            <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"></path>
+                        </svg>
+                        <svg class="theme-icon theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="tier-badge" id="tierBadge">LEVEL 1 &bull; NOVICE</div>
+                <div class="phrase-progress">
+                    <span id="charCountLabel">0 / 0</span>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="progressBarFill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typing Display Text Container -->
+            <div class="text-display-card" id="textDisplayCard" tabindex="0">
+                <div class="text-content" id="phraseDisplay">
+                    <!-- Dynamic spans injected by game.js -->
+                    <span class="click-to-start-hint">Click here or press any key to place your hand and start!</span>
+                </div>
+                <!-- Invisible high-compatibility input field to capture mobile or desktop inputs safely -->
+                <input type="text" id="hiddenInput" class="hidden-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            </div>
+
+            <div class="typing-footer-hint" id="typingFooterHint">
+                <span class="warning-badge" id="hintBadge">ALERT</span>
+                <span id="hintText">1 Error = 1 Stab. 5 Errors = Game Over.</span>
+            </div>
+        </section>
+
+        <!-- Welcome / Start & Mode Selection Overlay -->
+        <div class="modal-overlay hidden" id="startModal">
+            <div class="modal-card mode-select-card">
+                <div class="modal-header">
+                    <div class="modal-badge">SELECT GAME MODE</div>
+                    <h1 class="modal-title">KNIFE<span class="highlight">HAND</span></h1>
+                    <p class="modal-desc">Choose your challenge: </p>
+                </div>
+
+                <!-- Game mode cards -->
+                <div class="mode-cards-grid" id="modeCardsGrid">
+                    <!-- 1. Survival -->
+                    <div class="mode-card active" data-mode="survival" id="modeCard-survival" role="button" aria-pressed="true" tabindex="0">
+                        <div class="mode-card-header">
+                            <span class="mode-badge danger-tag">CLASSIC</span>
+                            <span class="mode-key">1</span>
+                        </div>
+                        <div class="mode-icon-wrap danger-glow">
+                            <svg class="mode-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 19 21 12 17 5 21 12 2"></polygon>
+                            </svg>
+                        </div>
+                        <h3 class="mode-card-title">SURVIVAL</h3>
+                        <p class="mode-card-desc">Five lives. Each error costs a finger. Phrases get harder as you survive.</p>
+                    </div>
+
+                    <!-- 2. One Phrase (Sprint) -->
+                    <div class="mode-card" data-mode="sprint" id="modeCard-sprint" role="button" aria-pressed="false" tabindex="0">
+                        <div class="mode-card-header">
+                            <span class="mode-badge cyan-tag">SPEED</span>
+                            <span class="mode-key">2</span>
+                        </div>
+                        <div class="mode-icon-wrap cyan-glow">
+                            <svg class="mode-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                            </svg>
+                        </div>
+                        <h3 class="mode-card-title">ONE PHRASE</h3>
+                        <p class="mode-card-desc">Type one phrase. See your speed and accuracy.</p>
+                    </div>
+
+                    <!-- 3. Infinite (Zen) -->
+                    <div class="mode-card" data-mode="infinite" id="modeCard-infinite" role="button" aria-pressed="false" tabindex="0">
+                        <div class="mode-card-header">
+                            <span class="mode-badge green-tag">ENDLESS</span>
+                            <span class="mode-key">3</span>
+                        </div>
+                        <div class="mode-icon-wrap green-glow">
+                            <svg class="mode-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18.178 8c5.096 0 5.096 8 0 8-2.68 0-4.408-2.148-6.178-4-1.77-1.852-3.498-4-6.178-4-5.096 0-5.096 8 0 8 2.68 0 4.408-2.148 6.178-4 1.77-1.852 3.498-4 6.178-4z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="mode-card-title">INFINITE</h3>
+                        <p class="mode-card-desc">Practice at your own pace. No lives, hand, or knife.</p>
+                    </div>
+
+                    <!-- 4. One Minute (Timer) -->
+                    <div class="mode-card" data-mode="timer" id="modeCard-timer" role="button" aria-pressed="false" tabindex="0">
+                        <div class="mode-card-header">
+                            <span class="mode-badge purple-tag">TIME ATTACK</span>
+                            <span class="mode-key">4</span>
+                        </div>
+                        <div class="mode-icon-wrap purple-glow">
+                            <svg class="mode-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="13" r="8"></circle>
+                                <path d="M12 9v4l2.5 1.5M9 2h6M12 2v3"></path>
+                            </svg>
+                        </div>
+                        <h3 class="mode-card-title">1 MINUTE</h3>
+                        <p class="mode-card-desc">Type as many complete words as you can in one minute.</p>
+                    </div>
+                </div>
+
+                <div class="modal-actions mode-menu-actions">
+                    <button id="backFromModeMenuBtn" class="secondary-btn" type="button" title="Back to the game">
+                        BACK
+                    </button>
+                    <button id="startGameBtn" class="primary-btn pulse-glow">
+                        <span id="startGameBtnText">START SURVIVAL</span>
+                    </button>
+                </div>
+
+                <!-- Minimalist Creator Credit in Start Screen -->
+                <div class="modal-creator-footer">
+                    <span>game by <strong class="author-highlight">Antareskrrt</strong> &bull; <a href="https://github.com/Antareskrrt" target="_blank" rel="noopener noreferrer" class="plain-link">GitHub</a> &bull; <a href="https://www.linkedin.com/in/daniele-ciafrei-87786630a/" target="_blank" rel="noopener noreferrer" class="plain-link">LinkedIn</a> &bull; <a href="https://discord.com/users/749546843540684881" target="_blank" rel="noopener noreferrer" class="plain-link">Discord</a></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over / Results Modal Overlay -->
+        <div class="modal-overlay hidden" id="gameOverModal">
+            <div class="modal-card gameover-card" id="resultsModalCard">
+                <div class="gameover-header">
+                    <div class="danger-emblem" id="resultsEmblem">
+                        <svg class="emblem-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </div>
+                    <h2 class="gameover-title" id="resultsTitle">ALL 5 FINGERS LOST</h2>
+                    <p class="gameover-subtitle" id="resultsSubtitle">The blade was faster than your keystrokes.</p>
+                </div>
+
+                <div class="results-grid">
+                    <div class="result-box" id="resBox1">
+                        <span class="res-label" id="resLabel1">LEVEL REACHED</span>
+                        <span class="res-val" id="resLevel">1</span>
+                    </div>
+                    <div class="result-box highlight-box" id="resBox2">
+                        <span class="res-label" id="resLabel2">PEAK SPEED</span>
+                        <span class="res-val" id="resWpm">0 <small>WPM</small></span>
+                    </div>
+                    <div class="result-box" id="resBox3">
+                        <span class="res-label" id="resLabel3">ACCURACY</span>
+                        <span class="res-val" id="resAccuracy">0%</span>
+                    </div>
+                    <div class="result-box" id="resBox4">
+                        <span class="res-label" id="resLabel4">PHRASES CLEARED</span>
+                        <span class="res-val" id="resPhrases">0</span>
+                    </div>
+                </div>
+
+                <div class="high-score-banner" id="highScoreBanner">
+                    PERSONAL BEST: <span id="bestWpmVal">0</span> <span id="bestScoreUnit">WPM</span>
+                </div>
+
+                <div class="modal-actions dual-actions">
+                    <button id="playAgainBtn" class="primary-btn pulse-glow">
+                        <span id="playAgainBtnText">STITCH UP & PLAY AGAIN</span>
+                        <kbd>ENTER</kbd>
+                    </button>
+                    <button id="switchModeBtn" class="secondary-btn" title="Back to Game Modes">
+                        <svg class="hud-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        <span>CHANGE MODE</span>
+                        <kbd>M</kbd>
+                    </button>
+                </div>
+
+                <!-- Game Over Action Chips -->
+                <div class="modal-creator-footer">
+                    <span>Enjoyed Knife Hand? Support open-source updates:</span>
+                    <div class="footer-chips">
+                        <a href="https://buymeacoffee.com/antareskrrt" target="_blank" rel="noopener noreferrer" class="footer-chip bmc-gold">Support Creator</a>
+                        <a href="https://github.com/Antareskrrt" target="_blank" rel="noopener noreferrer" class="footer-chip">Star on GitHub</a>
+                        <a href="https://www.linkedin.com/in/daniele-ciafrei-87786630a/" target="_blank" rel="noopener noreferrer" class="footer-chip">LinkedIn</a>
+                        <a href="https://discord.com/users/749546843540684881" target="_blank" rel="noopener noreferrer" class="footer-chip">Discord</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script data-goatcounter="https://knifehand.goatcounter.com/count"
+     async src="//gc.zgo.at/count.js"></script>
+    <script src="audio.js"></script>
+    <script src="phrases.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
