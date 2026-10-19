@@ -1,1 +1,1 @@
-# FunToType.github.io
+# Funtotype.github.io
