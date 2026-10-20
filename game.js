@@ -122,7 +122,9 @@ class KnifeHandGame {
         // Auto-start in Survival mode — no opening card
         this.currentMode = 'survival';
         this.startModal.classList.add('hidden');
-        this.startGame();
+        // Do not focus the input during page load: mobile browsers only open
+        // their virtual keyboard from a user interaction.
+        this.startGame({ focus: false });
     }
 
     resizeCanvas() {
@@ -246,8 +248,36 @@ class KnifeHandGame {
                 return;
             }
 
+            // Printable keys entered in the capture field are handled by its
+            // input event. Handling keydown here as well would count them twice.
+            if (e.target === this.hiddenInput) {
+                // An empty capture input may not emit `input` for Backspace.
+                if (e.key === 'Backspace') {
+                    e.preventDefault();
+                    this.handleKeyPress(e);
+                }
+                return;
+            }
+
             // In-game typing handler
             this.handleKeyPress(e);
+        });
+
+        // Mobile keyboards and input methods do not consistently emit keydown.
+        // Read the text the browser actually inserted instead.
+        this.hiddenInput.addEventListener('input', (e) => {
+            const insertedText = this.hiddenInput.value;
+            this.hiddenInput.value = '';
+
+            if (e.inputType && e.inputType.startsWith('delete')) {
+                this.handleKeyPress({ key: 'Backspace', preventDefault() {} });
+                return;
+            }
+
+            for (const key of insertedText) {
+                this.handleKeyPress({ key, preventDefault() {} });
+                if (!this.isPlaying || this.isGameOver) break;
+            }
         });
 
         // Click on typing box or stage keeps input focused
@@ -292,7 +322,10 @@ class KnifeHandGame {
     }
 
     focusInput() {
-        if (this.hiddenInput) this.hiddenInput.focus();
+        if (this.hiddenInput) {
+            this.hiddenInput.value = '';
+            this.hiddenInput.focus({ preventScroll: true });
+        }
     }
 
     updateThemeToggle() {
@@ -328,7 +361,7 @@ class KnifeHandGame {
     //  GAME FLOW
     // ============================================================
 
-    startGame() {
+    startGame({ focus = true } = {}) {
         window.soundFX.ensureContext();
         this.startModal.classList.add('hidden');
         this.gameOverModal.classList.add('hidden');
@@ -362,7 +395,7 @@ class KnifeHandGame {
 
         // Load first phrase
         this.loadNewPhrase();
-        this.focusInput();
+        if (focus) this.focusInput();
 
         // Start WPM ticker
         if (this.wpmTimer) clearInterval(this.wpmTimer);
