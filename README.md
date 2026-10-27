@@ -75,8 +75,6 @@ Then navigate to `http://localhost:8000`.
 ## Support & Creator Credits
 
 Knife Hand is an open-source project created and maintained by **Daniele Ciafrei** (`@Antareskrrt`).
-
-- **Buy Me A Coffee**: [https://buymeacoffee.com/antareskrrt](https://buymeacoffee.com/antareskrrt)
 - **GitHub**: [https://github.com/Antareskrrt](https://github.com/Antareskrrt)
 - **LinkedIn**: [https://www.linkedin.com/in/daniele-ciafrei-87786630a/](https://www.linkedin.com/in/daniele-ciafrei-87786630a/)
 - **Discord**: [https://discord.com/users/749546843540684881](https://discord.com/users/749546843540684881)
