@@ -1,4 +1,4 @@
-# KNIFE HAND // Speed Typer Survival (Beta)
+# KNIFE HAND 
 
 An intense arcade speed typing game inspired by the legendary knife game (Five Finger Fillet).
 
